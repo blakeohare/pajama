@@ -1,0 +1,138 @@
+<html>
+	<head>
+		<title>Pajama Lang - Type Safe JavaScript and Python/PyGame</title>
+		<style type="text/css">
+			body {
+				font-family: "Trebuchet MS", sans-serif;
+				background-color:#fff;
+				color:#444;
+			}
+			a:link, a:visited {
+				color:#63f;
+				text-decoration:none;
+				font-weight:bold;
+			}
+
+			a:hover {
+				color:#3318ff;
+				text-decoration:underline;
+				font-weight:bold;
+			}
+			
+			h1, h2 {
+				color:#8ab;
+				margin:0px;
+			}
+			
+			h2 {
+				font-weight:normal;
+			}
+			
+			h3 {
+				color:#578;
+			}
+			
+			div#holder {
+				width:500px;
+				text-align:justify;
+				font-size:13px;
+				line-height:32px;
+			}
+			
+			div.section {
+				font-family: "Verdana", sans-serif;
+				padding-left:20px;
+				margin-bottom:40px;
+			}
+			
+			div#subheading {
+				font-weight:bold;
+				color:#aaa;
+				font-style:italic;
+			}
+			
+			.demo {
+				font-weight:bold;
+				color:#578;
+			}
+			
+		</style>
+	</head>
+	
+	<body>
+		<div id="holder">
+			<h1>Pajama</h1>
+			<div id="subheading">
+				A programming language for 2D sprite games.
+			</div>
+			
+			<h2>Overview</h2>
+			<div class="section">
+				<p>
+					Pajama Lang is a translated language for the purpose of creating 
+					2D games. It is almost a proper subset of C#’s syntax, where the
+					eventual goal is to actually be able to compile and debug directly
+					in C#. Currently, it gets translated into JavaScript and Python
+					(with PyGame). Once exported, the output files should work out of
+					the box and require no post-export tweaks. It is ready to post or
+					share and is guaranteed to behave identically on both platforms.
+				</p>
+
+				<p>
+					Pajama is Object Oriented and type safe. Variables must be declared
+					before they are used and can only be assigned compatible types.
+					Typo’d variable usages are compile time errors, unlike either of the
+					platforms it exports to.
+				</p>
+			</div>
+			
+			<h2>Current State (as of Aug 1, 2013)</h2>
+			<div class="section">
+				<p>
+					Pajama was written in a weekend. Last weekend, actually. It's very
+					unstable at the moment but is surprisingly usable. If you're feeling
+					adventurous, feel free to help test it.
+				</p>
+			</div>
+			
+			<h2>Documentation</h2>
+			<div class="section">
+				<p>
+					I will eventually post the documentation here once the language
+					stabilizes a bit more. For now, I am keeping the documentation in
+					a living Google Doc which can be commented on.
+				</p>
+				
+				<p><a href="https://docs.google.com/document/d/19Ru5T2VKQWCCh8I76Il1ED85f7xOOhmE11dz4tLH-TE/edit#">Documentation document</a></p>
+			</div>
+			
+			<h2>Source</h2>
+			<div class="section">
+				<p>
+					The source code can be found on the <a href="http://code.google.com/p/pajama">Google
+					Code project page</a>.
+				</p>
+			</div>
+			
+			<h2>Download binary</h2>
+			<div class="section">
+				<p>
+					Here, have a <a href="http://www.blakeohare.com/projects/pajama/pajama_2013_08_01.exe">Windows
+					Binary</a>. I mildly regret my decision to use C# and hope to convert
+					the compiler to Python or something that runs easily on other platforms
+					in the future. Maybe even C/C++.
+				</p>
+			</div>
+			
+			<h2>Demos</h2>
+			<div class="section">
+				<div>
+					<span class="demo">Minesweeper</span><br />
+					<a href="/projects/pajama/minesweeper/">JavaScript</a> |
+					<a href="/projects/pajama/minesweeper_py.zip">Python/PyGame</a> |
+					<a href="https://code.google.com/p/pajama/source/browse/#svn%2Ftrunk%2FDemos%2FMinesweeper">PJ Source</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

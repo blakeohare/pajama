@@ -1,0 +1,104 @@
+﻿class Pair<A, B> {
+	A first;
+	B second;
+	Pair(A first, B second) { }
+}
+
+class List<T> {
+	void add(T item) { }
+	void removeAt(int index) { }
+	void insert(int index, T item) { }
+	int length;
+	string join(string delimiter) { return ''; }
+}
+
+class Map<K, V> {
+	// These cannot be assigned to.
+	List<K> keys;
+	List<V> values;
+	List<Pair<K, V>> entries;
+
+	bool contains(K key) { return false; }
+	V tryGet(K key, V default) { return default; }
+}
+
+class Func<...> { }
+
+class Class<C> { }
+
+class Time {
+	static float currentFloat() { return 0.0; }
+	static int currentInt() { return 0; }
+}
+
+// all these methods are overridden with fast inline implementations
+class Math {
+	static float randomFloat() { return 0.0; }
+	static int randomInt(int exclusiveMax) { return 0; }
+	static int floor(float value) { return 0; }
+	static int parseInt(string value) { return 0; }
+	static float parseFloat(string value) { return 0.0; }
+	// TODO: the syntax here...
+	//static void shuffle<T>(List<T> anyList) { }
+}
+
+class PJImage {
+	static PJImage loadFromFile(string path) { }
+	static PJImage createBlank(int width, int height) { }
+
+	int width;
+	int height;
+	// object _pgImage
+
+	PJImage(string filepath, int width, int height) { }
+
+	void blit(PJImage img, int x, int y) { }
+
+	void fill(int red, int green, int blue) { }
+}
+
+class PJ {
+	static void print(string value) { }
+}
+
+class PJEvent {
+	string type;
+	string keycode;
+	int x;
+	int y;
+	bool isPrimary;
+	static Map<int, string> keyCodeMapping = null;
+
+	PJEvent(string type, string keycode, int x, int y, bool isPrimary) {
+		this.type = type;
+		this.keycode = keycode;
+		this.x = x;
+		this.y = y;
+		this.isPrimary = isPrimary;
+	}
+
+	static string convertKeyCode(int rawKeyCode) { }
+}
+
+class PJGame {
+	PJGame(
+		Func<void> postInit,
+		Func<List<PJEvent>, Map<string, bool>, void> updater,
+		Func<PJImage, void> renderer,
+		int screenWidth,
+		int screenHeight,
+		int targetFps) { } // implementation overridden
+
+	void start() { } // implementation overridden
+
+	// TODO: remove this here and add virtually in the serializer, since it publicly doesn't need to be available in metadata.
+	void tick() { } // implementation overridden
+}
+
+class PJDraw {
+	
+	static void rectangle(PJImage image, int r, int g, int b, int x, int y, int width, int height, int border) { }
+	static void ellipse(PJImage image, int r, int g, int b, int centerX, int centerY, int radiusX, int radiusY, int border) { }
+	static void line(PJImage image, int r, int g, int b, int startX, int startY, int endX, int endY, int width) { }
+	// TODO: text
+}

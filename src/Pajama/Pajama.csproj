@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{546CAF9F-1411-4AA6-BE25-7D98609BFF4D}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pajama</RootNamespace>
+    <AssemblyName>Pajama</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DebugArgs.cs" />
+    <Compile Include="ExecutableSerializerBase.cs" />
+    <Compile Include="ExpressionSerializerBase.cs" />
+    <Compile Include="JavaScript\JavaScriptExecutableSerializer.cs" />
+    <Compile Include="JavaScript\JavaScriptExpressionSerializer.cs" />
+    <Compile Include="JavaScript\JavaScriptProjectBuilder.cs" />
+    <Compile Include="JavaScript\JavaScriptPyGameStandins.cs" />
+    <Compile Include="JavaScript\JavaScriptSerializer.cs" />
+    <Compile Include="Node\AssignmentStatement.cs" />
+    <Compile Include="Node\BooleanConstant.cs" />
+    <Compile Include="Node\BooleanNot.cs" />
+    <Compile Include="Node\BracketIndex.cs" />
+    <Compile Include="Node\BreakStatement.cs" />
+    <Compile Include="Node\Class.cs" />
+    <Compile Include="Node\ClassMember.cs" />
+    <Compile Include="Node\ConstructorCall.cs" />
+    <Compile Include="Node\ContinueStatement.cs" />
+    <Compile Include="Node\DotStep.cs" />
+    <Compile Include="Node\Executable.cs" />
+    <Compile Include="Node\Expression.cs" />
+    <Compile Include="Node\ExpressionAsExecutable.cs" />
+    <Compile Include="Node\ExpressionParser.cs" />
+    <Compile Include="Node\Field.cs" />
+    <Compile Include="Node\FloatConstant.cs" />
+    <Compile Include="Node\FunctionCall.cs" />
+    <Compile Include="Node\IfStatement.cs" />
+    <Compile Include="Node\IntegerConstant.cs" />
+    <Compile Include="Node\Interface.cs" />
+    <Compile Include="Node\LoopStatement.cs" />
+    <Compile Include="Node\Method.cs" />
+    <Compile Include="Node\Negative.cs" />
+    <Compile Include="Node\Noop.cs" />
+    <Compile Include="Node\NullConstant.cs" />
+    <Compile Include="Node\OpChain.cs" />
+    <Compile Include="Node\OpTree.cs" />
+    <Compile Include="Node\ReturnStatement.cs" />
+    <Compile Include="Node\StaticHost.cs" />
+    <Compile Include="Node\StaticMethod.cs" />
+    <Compile Include="Node\StringConstant.cs" />
+    <Compile Include="Node\ThisExpression.cs" />
+    <Compile Include="Node\VariableDeclaration.cs" />
+    <Compile Include="Node\VariableUsage.cs" />
+    <Compile Include="Node\ZType.cs" />
+    <Compile Include="Pair.cs" />
+    <Compile Include="Parser.cs" />
+    <Compile Include="ParserException.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="ProjectBuilder.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PyGameStandins.cs" />
+    <Compile Include="Python\PythonExecutableSerializer.cs" />
+    <Compile Include="Python\PythonExpressionSerializer.cs" />
+    <Compile Include="Python\PythonProjectBuilder.cs" />
+    <Compile Include="Python\PythonPyGameStandins.cs" />
+    <Compile Include="Python\PythonSerializer.cs" />
+    <Compile Include="SerializerBase.cs" />
+    <Compile Include="Token.cs" />
+    <Compile Include="Tokenizer.cs" />
+    <Compile Include="Tokens.cs" />
+    <Compile Include="TypeResolver.cs" />
+    <Compile Include="Util.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PJ.pj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="JavaScript\game.js" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

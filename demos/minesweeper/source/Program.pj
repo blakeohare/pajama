@@ -1,0 +1,462 @@
+class Program {
+	static int MaxMines = 99;
+	void init() {
+		PJGame game = new PJGame(
+			this.postInit,
+			this.update,
+			this.render,
+			504,
+			323,
+			30);
+			
+			game.start();
+	}
+	
+	int minesLeft;
+	
+	PJImage mineImage;
+	PJImage mineDetonated;
+	PJImage mineWrong;
+	PJImage flagImage;
+	PJImage coveredImage;
+	
+	PJImage smileyButtonNormal;
+	PJImage smileyButtonDead;
+	PJImage smileyButtonShades;
+	
+	List<PJImage> squareByNumber;
+	
+	bool timerStarted = false;
+	
+	PJImage makeNumberImage(PJImage sheet, int sheetX, int sheetY) {
+		PJImage output = PJImage.createBlank(16, 16);
+		output.blit(sheet, -sheetX, -sheetY);
+		return output;
+	}
+	
+	static List<List<int>> createNumberGrid(int width, int height, int startingValue) {
+		List<List<int>> columns = new List<List<int>>();
+		for (int x = width - 1; x >= 0; x = x - 1) {
+			List<int> column = new List<int>();
+			for (int y = height - 1; y >= 0; y = y - 1) {
+				column.add(startingValue);
+			}
+			columns.add(column);
+		}
+		return columns;
+	}
+	
+	List<List<int>> board = null;
+	List<List<int>> states = null;
+
+	string gameState = null; // Possibilities { "play", "lose", "win" }
+	
+	void initializeBoard() {
+		this.board = Program.createNumberGrid(30, 16, 0);
+		this.states = Program.createNumberGrid(30, 16, 0);;
+		this.minesLeft = Program.MaxMines;
+		this.gameState = "play";
+		this.timerStarted = false;
+		int totalMines = this.minesLeft;
+		int minesLaid = 0;
+		
+		int width = 30;
+		int height = 16;
+		
+		while (minesLaid < totalMines) {
+			int x = Math.randomInt(width);
+			int y = Math.randomInt(height);
+			if (this.board[x][y] == 0) {
+				this.board[x][y] = 10;
+				minesLaid = minesLaid + 1;
+			}
+		}
+		
+		for (int y = height - 1; y >= 0; y = y - 1) {
+			for (int x = width - 1; x >= 0; x = x - 1) {
+				
+				if (this.board[x][y] != 10) {
+					int surroundCount = 0;
+					for (int dx = -1; dx <= 1; dx = dx + 1) {
+						for (int dy = -1; dy <= 1; dy = dy + 1) {
+							if (dx != 0 || dy != 0) {
+								int newX = x + dx;
+								int newY = y + dy;
+								if (newX >= 0 && newY >= 0 && newX < width && newY < height) {
+									if (this.board[newX][newY] == 10)
+										surroundCount = surroundCount + 1;
+								}
+							}
+						}
+					}
+					
+					this.board[x][y] = surroundCount;
+				}
+			}
+		}
+		this.startTime = Time.currentInt();
+	}
+	
+	void postInit() {
+		PJImage sheet = PJImage.loadFromFile('image_sheet.png');
+		int left = 45;
+		int top = 24;
+		this.squareByNumber = new List<PJImage>();
+		for (int y = 0; y < 3; y = y + 1) {
+			for (int x = 0; x < 3; x = x + 1) {
+				this.squareByNumber.add(
+					this.makeNumberImage(sheet, 45 + x * 17, 24 + y * 17));
+			}
+		}
+		this.mineImage = PJImage.createBlank(16, 16);
+		this.mineImage.blit(sheet, -96, -58);
+		
+		this.coveredImage = PJImage.createBlank(16, 16);
+		this.coveredImage.blit(sheet, -28, -24);
+		
+		this.flagImage = PJImage.createBlank(16, 16);
+		this.flagImage.blit(sheet, -28, -41);
+		
+		this.mineDetonated = PJImage.createBlank(16, 16);
+		this.mineDetonated.blit(sheet, -96, -41);
+		
+		this.mineWrong = PJImage.createBlank(16, 16);
+		this.mineWrong.blit(sheet, -96, -24);
+		
+		this.smileyButtonNormal = PJImage.createBlank(26, 26);
+		this.smileyButtonNormal.blit(sheet, 0, -24);
+		this.smileyButtonOoh = PJImage.createBlank(26, 26);
+		this.smileyButtonOoh.blit(sheet, -27, -78);
+		this.smileyButtonDead = PJImage.createBlank(26, 26);
+		this.smileyButtonDead.blit(sheet, 0, -78);
+		this.smileyButtonShades = PJImage.createBlank(26, 26);
+		this.smileyButtonShades.blit(sheet, 0, -51);
+		
+		this.uiNumbers = new Map<string, PJImage>();
+		for (int i = 0; i <= 9; i = i + 1) {
+			PJImage img = PJImage.createBlank(13, 23);
+			img.blit(sheet, -i * 14, 0);
+			this.uiNumbers[i + ''] = img;
+		}
+		
+		this.initializeBoard();
+	}
+	
+	bool mouseHeld = false;
+	int mouseHeldX = 0;
+	int mouseHeldY = 0;
+	
+	bool smileyMouseHeld = false;
+	bool overSmiley = false;
+	
+	void update(List<PJEvent> events, Map<string, bool> pressedKeys) {
+	
+		int smileyLeft = 239;
+		int smileyRight = smileyLeft + 26;
+		int smileyTop = 15;
+		int smileyBottom = smileyTop + 26;
+		
+		for (int i = 0; i < events.length; i = i + 1) {
+			PJEvent e = events[i];
+			
+			int col = 0;
+			int row = 0;
+			bool inRange = false;
+			if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove') {
+				col = (e.x - 12) / 16;
+				row = (e.y - 55) / 16;
+				if (col >= 0 && col < 30 && row >= 0 && row < 16) {
+					inRange = true;
+				}
+				
+				this.overSmiley = (e.y < smileyBottom && e.x >= smileyLeft && e.x < smileyRight && e.y >= smileyTop);
+			}
+			
+			if (e.type == 'mousedown') {
+				if (this.overSmiley && e.isPrimary) {
+					this.smileyMouseHeld = true;
+				}
+				
+				if (this.gameState == 'play' && inRange) {
+					if (e.isPrimary) {
+						this.mouseHeld = true;
+						this.mouseHeldX = col;
+						this.mouseHeldY = row;
+					} else {
+						if (this.mouseHeld) {
+							this.mouseHeld = false;
+						} else {
+							this.markMine(col, row);
+							this.ensureTimerStarted();
+						}
+					}
+				}
+			} else if (e.type == 'mouseup') {
+				if (e.isPrimary) {
+					if (this.smileyMouseHeld) {
+						if (this.overSmiley) {
+							this.initializeBoard();
+						}
+						this.smileyMouseHeld = false;
+					}
+					
+					if (this.gameState == 'play' && inRange && this.mouseHeld) {
+						this.performClick(col, row);
+						this.ensureTimerStarted();
+					}
+					this.mouseHeld = false;
+				}
+			} else if (e.type == 'mousemove') {
+				if (this.mouseHeld) {
+					this.mouseHeldX = col;
+					this.mouseHeldY = row;
+				}
+			}
+		}
+	}
+	
+	void ensureTimerStarted() {
+		if (!this.timerStarted) {
+			this.startTime = Time.currentInt();
+			this.timerStarted = true;
+		}
+	}
+	
+	void performClick(int col, int row) {
+		if (this.states[col][row] == 0) {
+			if (this.board[col][row] == 0) {
+				this.cascadingClick(col, row);
+			} else if (this.board[col][row] < 9) {
+				this.states[col][row] = 1;
+			} else if (this.board[col][row] == 10) {
+				this.states[col][row] = 4;
+				this.setGameLose();
+			}
+		}
+	}
+	
+	void setGameLose() {
+		this.gameState = 'lose';
+		this.finalTime = Time.currentInt() - this.startTime;
+		for (int y = 0; y < 16; y = y + 1) {
+			for (int x = 0; x < 30; x = x + 1) {
+				int state = this.states[x][y];
+				if (state == 0) {
+					this.states[x][y] = 1;
+				} else if (state == 2) {
+					if (this.board[x][y] != 10) {
+						this.states[x][y] = 3;
+					}
+				}
+			}
+		}
+	}
+	
+	void cascadingClick(int col, int row) {
+	
+		Map<string, bool> traversed = new Map<string, bool>() { col + '|' + row, true };
+		List<List<int>> traversedCoords = new List<List<int>>() { new List<int>() {col, row } };
+		
+		List<List<int>> queue = new List<List<int>>() { new List<int>() { col, row } };
+		while (queue.length > 0) {
+			List<int> current = queue[0];
+			queue.removeAt(0);
+			List<List<int>> neighbors = new List<List<int>>();
+			for (int dx = -1; dx <= 1; dx = dx + 1) {
+				for (int dy = -1; dy <= 1; dy = dy + 1) {
+					if (dx != 0 || dy != 0) {
+						int newx = current[0] + dx;
+						int newy = current[1] + dy;
+						if (newx >= 0 && newx < 30 && newy >= 0 && newy < 16) {
+							neighbors.add(new List<int>() { current[0] + dx, current[1] + dy });
+						}
+					}
+				}
+			}
+			
+			for (int i = 0; i < neighbors.length; i = i + 1) {
+				List<int> neighbor = neighbors[i];
+				int x = neighbor[0];
+				int y = neighbor[1];
+				string key = neighbor[0] + '|' + neighbor[1];
+				if (!traversed.contains(key)) {
+					traversed[key] = true;
+					if (this.states[x][y] == 0 && this.board[x][y] < 9) {
+						traversedCoords.add(neighbor);
+						if (this.board[x][y] == 0) {
+							queue.add(neighbor);
+						}
+					}
+				}
+			}
+		}
+		
+		for (int i = 0; i < traversedCoords.length; i = i + 1) {
+			List<int> coord = traversedCoords[i];
+			int x = coord[0];
+			int y = coord[1];
+			this.states[x][y] = 1;
+		}
+	}
+	
+	void markMine(int col, int row) {
+		if (this.states[col][row] == 0) {
+			this.states[col][row] = 2;
+			this.minesLeft = this.minesLeft - 1;
+		} else if (this.states[col][row] == 2) {
+			this.states[col][row] = 0;
+			this.minesLeft = this.minesLeft + 1;
+		}
+	}
+	
+	void drawBevelBox(PJImage screen, int left, int top, int width, int height, int thickness, bool flipped) {
+		if (thickness == 0) return;
+		
+		int color1 = 255;
+		int color2 = 128;
+		if (flipped) {
+			color1 = 128;
+			color2 = 255;
+		}
+		
+		PJDraw.rectangle(screen, color1, color1, color1, left, top, 1, height - 1, 0);
+		PJDraw.rectangle(screen, color1, color1, color1, left, top, width - 1, 1, 0);
+		PJDraw.rectangle(screen, color2, color2, color2, left + 1, top + height - 1, width - 1, 1, 0);
+		PJDraw.rectangle(screen, color2, color2, color2, left + width - 1, top + 1, 1, height - 1, 0);
+		
+		this.drawBevelBox(screen, left + 1, top + 1, width - 2, height - 2, thickness - 1, flipped);
+	}
+	PJImage smileyButtonOoh;
+	
+	PJImage getSmileyButton() {
+		if (this.gameState == 'play') {
+			if (this.mouseHeld) {
+				return this.smileyButtonOoh;
+			}
+			return this.smileyButtonNormal;
+		} else if (this.gameState == 'lose') {
+			return this.smileyButtonDead;
+		} else {
+			return this.smileyButtonShades;
+		}
+	}
+	
+	Map<string, PJImage> uiNumbers;
+	
+	void renderNumber(PJImage screen, int value, int x, int y) {
+		if (value > 999) {
+			value = 999;
+		} else if (value < 0) {
+			value = 0;
+		}
+		string valueString = '' + value;
+		while (valueString.length < 3) {
+			valueString = '0' + valueString;
+		}
+		
+		screen.blit(this.uiNumbers[valueString[0]], x, y);
+		screen.blit(this.uiNumbers[valueString[1]], x + 13, y);
+		screen.blit(this.uiNumbers[valueString[2]], x + 26, y);
+	}
+	
+	int startTime = 0;
+	
+	void render(PJImage screen) {
+		screen.fill(192, 192, 192);
+		this.drawBevelBox(screen, 0, 0, screen.width, screen.height, 3, false);
+		this.drawBevelBox(screen, 9, 9, screen.width - 18, 37, 2, true);
+		this.drawBevelBox(screen, 9, 52, screen.width - 18, screen.height - 52 - 9, 3, true);
+		this.drawBevelBox(screen, 16, 15, 41, 25, 1, true);
+		this.drawBevelBox(screen, 445, 15, 41, 25, 1, true);
+		
+		this.renderNumber(screen, this.minesLeft, 17, 16);
+		int time = Time.currentInt() - this.startTime;
+		if (this.gameState != 'play') {
+			time = this.finalTime;
+		} else if (!this.timerStarted) {
+			time = 0;
+		}
+		this.renderNumber(screen, time, 446, 16);
+		
+		PJImage smiley = this.getSmileyButton();
+		screen.blit(smiley, 239, 15);
+		if (this.smileyMouseHeld && this.overSmiley) {
+			this.drawBevelBox(screen, 240, 16, smiley.width - 2, smiley.height - 2, 2, true);
+		}
+		this.renderBoard(screen, 12, 55);
+	}
+	
+	/*
+	 * board state:
+	 * 0 - covered
+	 * 1 - revealed
+	 * 2 - mine marked
+	 * 3 - mine wrongly marked
+	 * 4 - mine detonated
+	 */
+	
+	int clearedBoxes = 0;
+	
+	void renderBoard(PJImage screen, int left, int top) {
+		int width = this.board.length;
+		int height = this.board[0].length;
+		int pixelX = 0;
+		int pixelY = 0;
+		int value = 0;
+		int state = 0;
+		
+		this.clearedBoxes = 0;
+		
+		for (int y = 0; y < height; y = y + 1) {
+			for (int x = 0; x < width; x = x + 1) {
+				value = this.board[x][y];
+				state = this.states[x][y];
+				pixelX = left + x * 16;
+				pixelY = top + y * 16;
+				if (state == 0) {
+					if (this.mouseHeld && this.mouseHeldX == x && this.mouseHeldY == y) {
+						screen.blit(this.squareByNumber[0], pixelX, pixelY);
+					} else {
+						screen.blit(this.coveredImage, pixelX, pixelY);
+					}
+					
+				} else if (state == 1) {
+					this.clearedBoxes = this.clearedBoxes + 1;
+					if (value < 9) {
+						screen.blit(this.squareByNumber[this.board[x][y]], pixelX, pixelY);
+					} else if (value == 10) {
+						screen.blit(this.mineImage, pixelX, pixelY);
+					}
+				} else if (state == 2) {
+					screen.blit(this.flagImage, pixelX, pixelY);
+				} else if (state == 3) {
+					screen.blit(this.mineWrong, pixelX, pixelY);
+				} else if (state == 4) {
+					screen.blit(this.mineDetonated, pixelX, pixelY);
+				} else {
+					// no.
+				}
+					
+			}
+		}
+		
+		if (this.gameState == 'play' && this.clearedBoxes == 30 * 16 - Program.MaxMines) {
+			this.setStateWin();
+		}
+	}
+	
+	int finalTime;
+	
+	void setStateWin() {
+		this.gameState = 'win';
+		this.finalTime = Time.currentInt() - this.startTime;
+		this.clearedBoxes = 0;
+		for (int y = 0; y < 16; y = y + 1) {
+			for (int x = 0; x < 30; x = x + 1) {
+				if (this.states[x][y] == 0) {
+					this.states[x][y] = 1;
+				}
+			}
+		}
+	}
+}
